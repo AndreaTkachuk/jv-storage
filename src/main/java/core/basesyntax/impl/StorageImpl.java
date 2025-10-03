@@ -3,39 +3,43 @@ package core.basesyntax.impl;
 import core.basesyntax.Storage;
 
 public class StorageImpl<K, V> implements Storage<K, V> {
-    private static final int MAX_CAPACITY = 10;
-    private final Object[] keys = new Object[MAX_CAPACITY];
-    private final Object[] values = new Object[MAX_CAPACITY];
-    private int size = 0;
-
+     private static final int MAX_CAPACITY = 10;
+    private final K[] keys;
+    private final V[] values;
+    private int size;
+    @SuppressWarnings("unchecked")
+    public StorageImpl() {
+        keys = (K[]) new Object[MAX_CAPACITY];
+        values = (V[]) new Object[MAX_CAPACITY];
+        size = 0;
+    }
     @Override
     public void put(K key, V value) {
-        for (int i = 0; i < size; i++) {
-            if (keys[i] == null && key == null || keys[i] != null && keys[i].equals(key)) {
-                values[i] = value;
-                return;
-            }
-        }
-        if (size < MAX_CAPACITY) {
+        int index = findIndex(key);
+        if (index != -1) {
+            values[index] = value;
+        } else if (size < MAX_CAPACITY) {
             keys[size] = key;
             values[size] = value;
             size++;
         }
     }
-
     @Override
-    @SuppressWarnings("unchecked")
     public V get(K key) {
-        for (int i = 0; i < size; i++) {
-            if (keys[i] == null && key == null || keys[i] != null && keys[i].equals(key)) {
-                return (V) values[i];
-            }
-        }
-        return null;
+        int index = findIndex(key);
+        return index != -1 ? values[index] : null;
     }
-
     @Override
     public int size() {
         return size;
+    }
+
+    private int findIndex(K key) {
+        for (int i = 0; i < size; i++) {
+            if (keys[i] == null && key == null || keys[i] != null && keys[i].equals(key)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
